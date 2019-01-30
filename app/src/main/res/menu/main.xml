@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="example.com.test.MainActivity" >
+
+    <item android:id="@+id/add" 
+          android:title="@string/add" 
+          />
+    
+	<item android:id="@+id/deleteAll" 
+	      android:title="@string/deleteAll" 
+	      />
+	
+	<item android:id="@+id/exit" 
+	      android:title="@string/exit" 
+	      />
+	
+</menu>
