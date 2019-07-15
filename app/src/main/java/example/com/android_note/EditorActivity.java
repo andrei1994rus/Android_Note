@@ -218,7 +218,7 @@ public class EditorActivity extends AppCompatActivity
     		{
     			Intent photoPickerIntent=new Intent(Intent.ACTION_PICK,
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-    			photoPickerIntent.setType("ivImage/*");
+    			photoPickerIntent.setType("image/*");
 
     			startActivityForResult(photoPickerIntent, GALLERY_REQUEST);
     			dialog.dismiss();
