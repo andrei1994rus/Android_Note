@@ -447,7 +447,7 @@ public class EditorActivity extends AppCompatActivity
 	 * 					  is called during wrong input/output.
 	 *
 	 */
-	private File setUpPhotoFile() throws IOException 
+	File setUpPhotoFile() throws IOException
     {	
 		File f=createImageFile();
 		ImPath=f.getAbsolutePath();
@@ -464,7 +464,7 @@ public class EditorActivity extends AppCompatActivity
 	 * 					  is called during wrong input/output.
 	 *
 	 */
-	private File createImageFile() throws IOException
+	File createImageFile() throws IOException
     {
     	String timeStamp=new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
@@ -472,17 +472,16 @@ public class EditorActivity extends AppCompatActivity
 
 		File albumF=getAlbumDir();
 		File imageF=File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
-
 		return imageF;
 	}
 
 	/**
-	 * Gets name of album.
+	 * Gets directory of album.
 	 *
-	 * @return name of album.
+	 * @return directory of album.
 	 *
 	 */
-    private File getAlbumDir() 
+    File getAlbumDir()
     {
 		File storageDir=null;
 			
@@ -508,7 +507,7 @@ public class EditorActivity extends AppCompatActivity
 	 * @return name of album.
 	 *
 	 */
-	private String getAlbumName()
+	String getAlbumName()
     {
 		String AlbumName="Android_Note";
 
@@ -524,7 +523,7 @@ public class EditorActivity extends AppCompatActivity
 	 * @return path of image.
 	 *
 	 */
-	private String getRealPathFromURI(Uri uri) 
+	String getRealPathFromURI(Uri uri)
     {
     	String[] projection={MediaStore.Images.Media.DATA};
     	Cursor cursor=managedQuery(uri,
@@ -594,7 +593,7 @@ public class EditorActivity extends AppCompatActivity
 	/**
 	 * Adds image to gallery.
 	 */
-	private void galleryAddPic()
+	void galleryAddPic()
 	{
 		Intent mediaScanIntent=new Intent("android.intent.action.MEDIA_SCANNER_SCAN_FILE");
 
@@ -608,7 +607,7 @@ public class EditorActivity extends AppCompatActivity
 	/**
 	 * Sets image.
 	 */
-	private void setPic()
+	void setPic()
     {
 		int ImageViewW=ivImage.getWidth();
 
