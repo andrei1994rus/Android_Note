@@ -1,12 +1,22 @@
 package example.com.android_note;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+
+import example.com.android_note.activity.EditorActivity;
 
 import static org.junit.Assert.*;
 
 public class EditorActivityTest
 {
-    EditorActivity editorActivity=new EditorActivity();
+    private EditorActivity editorActivity;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        editorActivity=new EditorActivity();
+    }
 
     @Test
     public void getAlbumName()
@@ -14,5 +24,11 @@ public class EditorActivityTest
         String actual=editorActivity.getAlbumName();
         String expected="Android_Note";
         assertEquals(expected,actual);
+    }
+
+    @After
+    public void tearDown() throws Exception
+    {
+        editorActivity=null;
     }
 }

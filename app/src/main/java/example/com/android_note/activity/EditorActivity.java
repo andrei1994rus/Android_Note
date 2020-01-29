@@ -1,4 +1,4 @@
-package example.com.android_note;
+package example.com.android_note.activity;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import android.Manifest;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -18,6 +19,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -27,6 +29,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import example.com.android_note.directory.AlbumDirFactory;
+import example.com.android_note.directory.AlbumStorageDirFactory;
+import example.com.android_note.model.Note;
+import example.com.android_note.R;
+
 /**
  * Class of activity where may create/update note.
  */
@@ -35,74 +45,34 @@ public class EditorActivity extends AppCompatActivity
 	/**
 	 * Code of request to gallery.
 	 */
-	static final int GALLERY_REQUEST=1;
+	private static final int GALLERY_REQUEST=1;
 
 	/**
 	 * Code of request to action take photo.
 	 */
-	static final int ACTION_TAKE_PHOTO=2;
+	private static final int ACTION_TAKE_PHOTO=2;
 
 	/**
 	 * Code of request to camera.
 	 */
-    public static final int CAMERA_REQUEST=10;
-
-	/**
-	 * Suffix of jpg file.
-	 */
-	String JPEG_FILE_SUFFIX=".jpg";
+    private static final int CAMERA_REQUEST=10;
 
 	/**
 	 * Object of abstract class AlbumStorageDirFactory.
 	 */
-	AlbumStorageDirFactory mAlbumStorageDirFactory;
+	private AlbumStorageDirFactory mAlbumStorageDirFactory;
 
-	/**
-	 * Object of class toolbar. Is used for EditorActivity.
-	 */
-	Toolbar toolbarEditorActivity;
-
-	/**
+    /**
 	 * Object of class Bitmap. Is used for work with image.
 	 */
-	Bitmap bitmap;
+	private Bitmap bitmap;
 
 	/**
 	 * Object of class Dialog. Is used when it's necessary to select way do image for note.
 	 */
-	Dialog dialog;
+	private Dialog dialog;
 
-	/**
-	 * Object of class Button. Is used to add image.
-	 */
-	Button buttonAddImage;
-
-	/**
-	 * Object of class Button. Is used to save note.
-	 */
-	Button buttonSave;
-
-	/**
-	 * Object of class Button. Is used to exit from Editor Activity without saving.
-	 */
-	Button buttonCancel;
-
-	/**
-	 * Object of class Button. Is used to delete image.
-	 */
-	Button buttonDeleteImage;
-
-	/**
-	 * Object of class Button. Is used to add image via gallery.
-	 */
-	Button buttonGallery;
-
-	/**
-	 * Object of class Button. Is used to adding image via camera.
-	 */
-	Button buttonCamera;
-
-	/**
+    /**
 	 * Object of class EditText. Holds text of note.
 	 */
 	EditText etNoteText;
@@ -110,32 +80,37 @@ public class EditorActivity extends AppCompatActivity
 	/**
 	 * Object of class ImageView. Holds image of note.
 	 */
-	ImageView ivImage;
+	private ImageView ivImage;
 
 	/**
 	 * Object of note. Holds data of every note.
 	 */
-	Note note;
+	private Note note;
 
 	/**
 	 * Id of note.
 	 */
-	long NoteID;
+	private long NoteID;
 
 	/**
 	 * Text of note.
 	 */
-	String text;
+	private String text;
 
 	/**
 	 * Date of note's adding/updating.
      */
-	String dateString;
+	private String dateString;
 
 	/**
 	 * Path of image.
 	 */
-	String ImPath;
+	private String ImPath;
+
+    /**
+     * Version of API. Is used for check version.
+     */
+	private int api;
 
 	/**
 	 * Creates activity.
@@ -148,26 +123,29 @@ public class EditorActivity extends AppCompatActivity
 	{
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.activity_editor);
+		if(getResources().getConfiguration().orientation==Configuration.ORIENTATION_PORTRAIT)
+		{
+			setContentView(R.layout.activity_editor);
+		}
 
-		toolbarEditorActivity=(Toolbar) findViewById(R.id.toolbarEditorActivity);
+		else if(getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE)
+		{
+			setContentView(R.layout.activity_editor_land);
+		}
+
+        /*
+          Object of class toolbar. Is used for EditorActivity.
+         */
+        Toolbar toolbarEditorActivity = findViewById(R.id.toolbarEditorActivity);
 		setSupportActionBar(toolbarEditorActivity);
 
-		etNoteText=(EditText) findViewById(R.id.NoteText);
+		etNoteText=findViewById(R.id.NoteText);
 
-		ivImage=(ImageView) findViewById(R.id.imageView1);
-
-        buttonAddImage=(Button) findViewById(R.id.AddImage);
-
-        buttonSave=(Button) findViewById(R.id.Save);
-
-        buttonCancel=(Button) findViewById(R.id.Cancel);
-
-        buttonDeleteImage=(Button) findViewById(R.id.DeleteImage);
+		ivImage=findViewById(R.id.imageViewNote);
         
-        if (getIntent().hasExtra("Note")) 
+        if(getIntent().hasExtra("Note"))
         {
-        	note=(Note) getIntent().getSerializableExtra("Note");
+        	note=(Note)getIntent().getSerializableExtra("Note");
         	
         	dateString=note.getDate();
 
@@ -179,7 +157,28 @@ public class EditorActivity extends AppCompatActivity
 
         	NoteID=note.getID();
         }
-        
+
+        ivImage.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+		    public void onClick(View v)
+			{
+				Drawable imageDrawable=ivImage.getDrawable();
+
+				if(imageDrawable!=null)
+				{
+					Intent intent=new Intent(getApplicationContext(),WatchImageActivity.class).
+										putExtra("path",ImPath);
+					startActivity(intent);
+				}
+
+				else
+				{
+					Toast.makeText(getApplicationContext(),"This note doesn't have image.",
+							Toast.LENGTH_LONG).show();
+				}
+			}
+		});
     }
 
 	/**
@@ -209,8 +208,11 @@ public class EditorActivity extends AppCompatActivity
     	dialog.setContentView(R.layout.dialog_view);
     	dialog.getActionBar();
     	dialog.show();
-    	
-    	buttonGallery=(Button) dialog.findViewById(R.id.buttonGallery);
+
+        /*
+          Object of class Button. Is used to add image via gallery.
+         */
+        Button buttonGallery = dialog.findViewById(R.id.buttonGallery);
 
     	buttonGallery.setOnClickListener(new OnClickListener()
     	{
@@ -220,25 +222,28 @@ public class EditorActivity extends AppCompatActivity
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
     			photoPickerIntent.setType("image/*");
 
-    			startActivityForResult(photoPickerIntent, GALLERY_REQUEST);
+    			startActivityForResult(photoPickerIntent,GALLERY_REQUEST);
     			dialog.dismiss();
     		}
     	});
     	
     	mAlbumStorageDirFactory=new AlbumDirFactory();
 
-    	buttonCamera=(Button) dialog.findViewById(R.id.buttonCamera);
+        /*
+          Object of class Button. Is used to adding image via camera.
+         */
+        Button buttonCamera = dialog.findViewById(R.id.buttonCamera);
 
     	buttonCamera.setOnClickListener(new OnClickListener()
     	{
     		public void onClick(View v)
     		{
-				int api=Build.VERSION.SDK_INT;
+				api=Build.VERSION.SDK_INT;
 
-				if (api>=23)
+				if(api>=23)
 				{
-					if (ContextCompat.checkSelfPermission(getApplicationContext(),
-							Manifest.permission.CAMERA)== PackageManager.PERMISSION_GRANTED)
+					if(ContextCompat.checkSelfPermission(getApplicationContext(),
+							Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED)
 					{
 						dispatchTakePictureIntent(ACTION_TAKE_PHOTO);
 						dialog.dismiss();
@@ -246,7 +251,7 @@ public class EditorActivity extends AppCompatActivity
 
 					else
 					{
-						if (ActivityCompat.shouldShowRequestPermissionRationale(EditorActivity.this,
+						if(ActivityCompat.shouldShowRequestPermissionRationale(EditorActivity.this,
 								Manifest.permission.CAMERA))
 						{
 							ActivityCompat.requestPermissions(EditorActivity.this,
@@ -267,7 +272,7 @@ public class EditorActivity extends AppCompatActivity
 						}
 					}
 				}
-				else if (api<23)
+				else
 				{
 					dispatchTakePictureIntent(ACTION_TAKE_PHOTO);
 					dialog.dismiss();
@@ -293,17 +298,17 @@ public class EditorActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults)
     {
-        switch (requestCode)
+        switch(requestCode)
         {
             case CAMERA_REQUEST:
             {
-                if (grantResults.length>0 &&
+                if(grantResults.length>0 &&
                         grantResults[0]==PackageManager.PERMISSION_GRANTED)
                 {
-                    if (ContextCompat.checkSelfPermission(this,
+                    if(ContextCompat.checkSelfPermission(this,
                             Manifest.permission.CAMERA)==PackageManager.PERMISSION_GRANTED)
                     {
-                        Toast.makeText(this,"Permission Granted",Toast.LENGTH_LONG).show();
+                        Toast.makeText(this,"Permission is granted",Toast.LENGTH_LONG).show();
 
 						dispatchTakePictureIntent(ACTION_TAKE_PHOTO);
 						dialog.dismiss();
@@ -314,7 +319,6 @@ public class EditorActivity extends AppCompatActivity
                     Toast.makeText(this,"Permission isn't granted",Toast.LENGTH_LONG).show();
                 }
 
-                return;
             }
         }
     }
@@ -329,7 +333,7 @@ public class EditorActivity extends AppCompatActivity
 	 */
 	public void CancelClick(View v)
 	{
-		setResult(RESULT_CANCELED, new Intent());
+		setResult(RESULT_CANCELED,new Intent());
 		finish();
 	}
 
@@ -342,9 +346,9 @@ public class EditorActivity extends AppCompatActivity
 	 */
 	public void SaveClick(View v)
 	{
-		if (etNoteText.getText().toString().equals(""))
+		if(etNoteText.getText().toString().equals(""))
 		{
-			Toast.makeText(getApplicationContext(), "Text Field is empty.", Toast.LENGTH_LONG ).show();
+			Toast.makeText(getApplicationContext(),"Text Field is empty.",Toast.LENGTH_LONG ).show();
 		}
 
 		else
@@ -356,11 +360,11 @@ public class EditorActivity extends AppCompatActivity
 
 			text=etNoteText.getText().toString();
 
-		    note=new Note (NoteID, dateString, text,ImPath);
+		    note=new Note(NoteID,dateString,text,ImPath);
 
 		    Intent intent=getIntent();
-		    intent.putExtra("Note", note);
-		    setResult(RESULT_OK, intent);
+		    intent.putExtra("Note",note);
+		    setResult(RESULT_OK,intent);
 
 		    finish();
 		}
@@ -392,7 +396,7 @@ public class EditorActivity extends AppCompatActivity
 	@Override
     protected void onSaveInstanceState(Bundle outState) 
     {
-        outState.putString("ImPath", ImPath);
+        outState.putString("ImPath",ImPath);
 
         super.onSaveInstanceState(outState);
     }
@@ -415,18 +419,28 @@ public class EditorActivity extends AppCompatActivity
 
 		    	try
 		    	{
-		    		f=setUpPhotoFile();
-		    		ImPath=f.getAbsolutePath();
+					f=setUpPhotoFile();
+					ImPath=f.getAbsolutePath();
 
-		    		takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-		    		startActivityForResult(takePictureIntent, actionCode);
+					if(api>=24)
+					{
+						takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+													FileProvider.getUriForFile(this,
+													"com.example.android.provider",
+													f));
+					}
+
+					else
+					{
+						takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(f));
+
+					}
+		    		startActivityForResult(takePictureIntent,actionCode);
 		    	}
 
-		    	catch (IOException e)
+		    	catch(IOException e)
 		    	{
 		    		e.printStackTrace();
-
-		    		f=null;
 
 		    		ImPath=null;
 		    	}
@@ -471,7 +485,7 @@ public class EditorActivity extends AppCompatActivity
 		String imageFileName="IMG_"+timeStamp+"_";
 
 		File albumF=getAlbumDir();
-		File imageF=File.createTempFile(imageFileName, JPEG_FILE_SUFFIX, albumF);
+		File imageF=File.createTempFile(imageFileName,".jpg",albumF);
 		return imageF;
 	}
 
@@ -487,11 +501,11 @@ public class EditorActivity extends AppCompatActivity
 			
 		storageDir=mAlbumStorageDirFactory.getAlbumStorageDir(getAlbumName());
 
-		if (storageDir!=null)
+		if(storageDir!=null)
 		{
-			if (!storageDir.mkdirs()) 
+			if(!storageDir.mkdirs())
 			{
-				if (!storageDir.exists())
+				if(!storageDir.exists())
 				{
 					return null;
 				}
@@ -507,11 +521,9 @@ public class EditorActivity extends AppCompatActivity
 	 * @return name of album.
 	 *
 	 */
-	String getAlbumName()
+	public String getAlbumName()
     {
-		String AlbumName="Android_Note";
-
-		return AlbumName;
+		return "Android_Note";
 	}
 
 	/**
@@ -552,9 +564,9 @@ public class EditorActivity extends AppCompatActivity
 	 *
 	 */
 	@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) 
+    protected void onActivityResult(int requestCode,int resultCode,Intent imageReturnedIntent)
     {
-    	super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+    	super.onActivityResult(requestCode,resultCode,imageReturnedIntent);
     	
     	switch(requestCode) 
     	{
@@ -566,10 +578,10 @@ public class EditorActivity extends AppCompatActivity
 
     	    		try
     	    		{
-    	    			bitmap=MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+    	    			bitmap=MediaStore.Images.Media.getBitmap(getContentResolver(),selectedImage);
     	    		}
 
-    	    		catch (IOException e)
+    	    		catch(IOException e)
     	    		{
     	    	    	e.printStackTrace();
     	    	    }
@@ -580,7 +592,7 @@ public class EditorActivity extends AppCompatActivity
                 break;
 
     	    case ACTION_TAKE_PHOTO:
-    	    	if (resultCode==RESULT_OK)
+    	    	if(resultCode==RESULT_OK)
     	    	{
     	    		galleryAddPic();
     	    		setPic();
@@ -599,7 +611,6 @@ public class EditorActivity extends AppCompatActivity
 
 		File f=new File(ImPath);
 		Uri contentUri=Uri.fromFile(f);
-
 		mediaScanIntent.setData(contentUri);
 		this.sendBroadcast(mediaScanIntent);
 	}
@@ -609,12 +620,8 @@ public class EditorActivity extends AppCompatActivity
 	 */
 	void setPic()
     {
-		int ImageViewW=ivImage.getWidth();
-
-		int ImageViewH=ivImage.getHeight();
-		
-		bitmap=Utils.decodeSampledBitmapFromResource(ImPath, ImageViewW, ImageViewH);
-		ivImage.setImageBitmap(bitmap);
+		Glide.with(this).load(ImPath).apply(new RequestOptions().
+				override(ivImage.getWidth(),ivImage.getHeight())).into(ivImage);
 	}
 
 }

@@ -1,4 +1,4 @@
-package example.com.android_note;
+package example.com.android_note.directory;
 
 import java.io.File;
 
@@ -7,10 +7,6 @@ import java.io.File;
  */
 public class AlbumDirFactory extends AlbumStorageDirFactory 
 {
-	/**
-	 * Path of album.
-	 */
-	String path="mnt/sdcard";
 
 	/**
 	 * Creates album.
@@ -24,7 +20,7 @@ public class AlbumDirFactory extends AlbumStorageDirFactory
 	@Override
 	public File getAlbumStorageDir(String albumName) 
 	{
-		return new File(path,albumName);
+		return new File("mnt/sdcard",albumName);
 	}
 
 }

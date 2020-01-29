@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
-
-    tools:context="example.com.android_note.activity.EditorActivity">
+    tools:context="example.com.android_note.activity.EditorActivity"
+    tools:ignore="MissingDefaultResource">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbarEditorActivity"
@@ -52,7 +52,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginTop="55dp"
+            android:layout_marginTop="52dp"
             android:focusableInTouchMode="false"
             android:isScrollContainer="false"
             android:text="@string/textField"
@@ -97,24 +97,22 @@
 
         <ImageView
             android:id="@+id/imageViewNote"
-            android:layout_width="0dp"
-            android:layout_height="150dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="12dp"
-            android:layout_marginLeft="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginRight="12dp"
-            android:layout_marginBottom="132dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="80dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:clickable="true"
             android:focusableInTouchMode="false"
             android:isScrollContainer="false"
-            android:clickable="true"
             android:scaleType="fitXY"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/Save"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scrollView"
-            app:layout_constraintVertical_bias="0.744" />
+            app:layout_constraintHorizontal_bias="0.747"
+            app:layout_constraintStart_toEndOf="@+id/scrollView"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/AddImage"
@@ -152,8 +150,8 @@
 
         <ScrollView
             android:id="@+id/scrollView"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="80dp"
@@ -169,10 +167,10 @@
 
                 <EditText
                     android:id="@+id/NoteText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="100dp"
+                    android:layout_height="110dp"
                     android:layout_below="@+id/text"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentLeft="false"
                     android:hint="@string/interText"
                     android:isScrollContainer="false" />
             </LinearLayout>

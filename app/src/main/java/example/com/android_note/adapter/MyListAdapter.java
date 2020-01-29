@@ -1,4 +1,4 @@
-package example.com.android_note;
+package example.com.android_note.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,52 +9,38 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
 import java.util.ArrayList;
+
+import example.com.android_note.model.Note;
+import example.com.android_note.R;
 
 /**
  * Class of Adapter which is used for fill of listNotes.
  */
-public class myListAdapter extends BaseAdapter
+public class MyListAdapter extends BaseAdapter
 {
     /**
      * Object of class Note. Holds data of every note.
      */
-    Note note;
+    private Note note;
 
     /**
      * Object of class ArrayList. Is array of note.
      */
-    ArrayList<Note> arrayNote;
-
-    /**
-     * Object of class Bitmap. Is used for work with image.
-     */
-    Bitmap bitmap;
+    private ArrayList<Note> arrayNote;
 
     /**
      * Object of class LayoutInflater. Is used for converting View.
      */
-    LayoutInflater layoutInflater;
-
-    /**
-     * Object of class ImageView. Holds image of note.
-     */
-    ImageView ivImage;
-
-    /**
-     * Object of TextView. Holds text of note.
-     */
-    TextView tvText;
-
-    /**
-     *  Object of class TextView. Holds date of note's creating/updating.
-     */
-    TextView tvDate;
+    private LayoutInflater layoutInflater;
 
     /**
      * Size of image.
      */
-    int sizeImage;
+    private int sizeImage;
 
     /**
      * Constructor.
@@ -65,7 +51,7 @@ public class myListAdapter extends BaseAdapter
      * @param arr
      *           object of class ArrayList. Is used for filling listNotes.
      */
-    public myListAdapter(Context ctx, ArrayList<Note> arr)
+    public MyListAdapter(Context ctx, ArrayList<Note> arr)
     {
         layoutInflater=LayoutInflater.from(ctx);
 
@@ -85,7 +71,6 @@ public class myListAdapter extends BaseAdapter
     {
         this.arrayNote=arrayNote;
     }
-
 
     /**
      * Gets array of note.
@@ -136,7 +121,7 @@ public class myListAdapter extends BaseAdapter
     {
         note=arrayNote.get(position);
 
-        if (note!=null)
+        if(note!=null)
         {
             return note.getID();
         }
@@ -161,14 +146,23 @@ public class myListAdapter extends BaseAdapter
      */
     public View getView(int position, View convertView, ViewGroup parent)
     {
-        if (convertView==null)
-            convertView=layoutInflater.inflate(R.layout.item, null);
 
-        ivImage=(ImageView) convertView.findViewById(R.id.Image);
+        convertView=layoutInflater.inflate(R.layout.item,null);
 
-        tvText=(TextView) convertView.findViewById(R.id.Text);
+        /*
+          Object of class ImageView. Holds image of note.
+         */
+        ImageView ivImage=convertView.findViewById(R.id.Image);
 
-        tvDate=(TextView) convertView.findViewById(R.id.Date);
+        /*
+          Object of TextView. Holds text of note.
+         */
+        TextView tvText=convertView.findViewById(R.id.Text);
+
+        /*
+           Object of class TextView. Holds date of note's creating/updating.
+         */
+        TextView tvDate=convertView.findViewById(R.id.Date);
 
         note=arrayNote.get(position);
 
@@ -176,10 +170,11 @@ public class myListAdapter extends BaseAdapter
 
         tvText.setText(note.getText());
 
-        String image=note.getImagePath();
-
-        bitmap=Utils.decodeSampledBitmapFromResource(image, sizeImage, sizeImage);
-        ivImage.setImageBitmap(bitmap);
+        Glide.with(convertView).
+                load(note.getImagePath()).
+                apply(new RequestOptions().
+                        override(sizeImage)).
+                into(ivImage);
 
         return convertView;
     }

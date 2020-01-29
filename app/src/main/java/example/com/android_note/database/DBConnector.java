@@ -1,4 +1,4 @@
-package example.com.android_note;
+package example.com.android_note.database;
 
 import java.util.ArrayList;
 
@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import example.com.android_note.model.Note;
+
 /**
  * This class is used for work with database.
  */
@@ -16,62 +18,62 @@ public class DBConnector
 	/**
 	 * Column "Date".
 	 */
-	String COLUMN_DATE="Date";
+	private String COLUMN_DATE="Date";
 
 	/**
 	 * Column "Id".
 	 */
-	String COLUMN_ID="_id";
+	private String COLUMN_ID="_id";
 
 	/**
 	 * Column "ImagePath".
 	 */
-	String COLUMN_IMAGEPATH="PathImage";
+	private String COLUMN_IMAGEPATH="PathImage";
 
 	/**
 	 * Column "Text".
 	 */
-	String COLUMN_TEXT="Text";
+	private String COLUMN_TEXT="Text";
 
 	/**
 	 * Column "Name".
 	 */
-	String DATABASE_NAME="note.db";
+	private String DATABASE_NAME="note.db";
 
 	/**
 	 * Version of database.
 	 */
-	int DATABASE_VERSION=1;
+	private int DATABASE_VERSION=1;
 
 	/**
 	 * Number of column "Date".
 	 */
-	int NUM_COLUMN_DATE=1;
+	private int NUM_COLUMN_DATE=1;
 
 	/**
 	 * Number of column "Id".
 	 */
-	int NUM_COLUMN_ID=0;
+	private int NUM_COLUMN_ID=0;
 
 	/**
 	 * Number of column "ImagePath".
 	 */
-	int NUM_COLUMN_IMAGEPATH=3;
+	private int NUM_COLUMN_IMAGEPATH=3;
 
 	/**
 	 * Number of column "Text".
 	 */
-	int NUM_COLUMN_TEXT=2;
+	private int NUM_COLUMN_TEXT=2;
 
 	/**
 	 * Name of table.
 	 */
-	String TABLE_NAME="Note";
+	private String TABLE_NAME="Note";
 
 	/**
 	 * Object of class SQLiteDatabase. Is used for work with data.
 	 */
-	SQLiteDatabase dataBase;
+	private SQLiteDatabase dataBase;
 
 	/** Constructor of class DBConnector.
 	 *
@@ -107,7 +109,7 @@ public class DBConnector
 	 */
 	public void deleteAll() 
 	{
-		dataBase.delete(TABLE_NAME, null, null);
+		dataBase.delete(TABLE_NAME,null,null);
 	}
 
 	/**
@@ -119,14 +121,14 @@ public class DBConnector
 	 * @return inserted note via SQL-command INSERT.
      *
 	 */
-	public long insert(Note note) 
+	public long insert(Note note)
 	{
 		ContentValues cv=new ContentValues();
-		cv.put(COLUMN_DATE, note.getDate());
-		cv.put(COLUMN_TEXT, note.getText());
-		cv.put(COLUMN_IMAGEPATH, note.getImagePath());
+		cv.put(COLUMN_DATE,note.getDate());
+		cv.put(COLUMN_TEXT,note.getText());
+		cv.put(COLUMN_IMAGEPATH,note.getImagePath());
 		
-		return dataBase.insert(TABLE_NAME, null, cv);
+		return dataBase.insert(TABLE_NAME,null,cv);
 	}
 
 	/**
@@ -159,7 +161,7 @@ public class DBConnector
 
 		String imagePath=mCursor.getString(NUM_COLUMN_IMAGEPATH);
 
-		return new Note(id, date, title, imagePath);
+		return new Note(id,date,title,imagePath);
 	}
 
 	/**
@@ -178,11 +180,11 @@ public class DBConnector
 								null,
 										COLUMN_DATE);
 		
-		ArrayList<Note> arr=new ArrayList<Note>();
+		ArrayList<Note> noteArrayList=new ArrayList<>();
 
 		cursor.moveToFirst();
 
-		if (!cursor.isAfterLast())
+		if(!cursor.isAfterLast())
 		{
 			do 
 			{
@@ -190,11 +192,11 @@ public class DBConnector
 				String date=cursor.getString(NUM_COLUMN_DATE);
 				String title=cursor.getString(NUM_COLUMN_TEXT);
 				String imagePath=cursor.getString(NUM_COLUMN_IMAGEPATH);
-				arr.add(new Note(id, date, title, imagePath));
+				noteArrayList.add(new Note(id,date,title,imagePath));
 			} 
 			while (cursor.moveToNext());
 		}
-		return arr;
+		return noteArrayList;
 	}
 
 	/**
@@ -209,9 +211,9 @@ public class DBConnector
 	public int update(Note note) 
 	{
 		ContentValues cv=new ContentValues();
-		cv.put(COLUMN_DATE, note.getDate());
-		cv.put(COLUMN_TEXT, note.getText());
-		cv.put(COLUMN_IMAGEPATH, note.getImagePath());
+		cv.put(COLUMN_DATE,note.getDate());
+		cv.put(COLUMN_TEXT,note.getText());
+		cv.put(COLUMN_IMAGEPATH,note.getImagePath());
 
 		return dataBase.update(TABLE_NAME,
 								cv,
@@ -236,7 +238,7 @@ public class DBConnector
 		 */
 		OpenHelper(Context context)
 		{
-			super(context, DATABASE_NAME, null, DATABASE_VERSION);
+			super(context,DATABASE_NAME,null,DATABASE_VERSION);
 		}
 
 		/**
@@ -271,7 +273,7 @@ public class DBConnector
          *
 		 */
 		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+		public void onUpgrade(SQLiteDatabase db,int oldVersion,int newVersion)
 		{
 			db.execSQL("DROP TABLE IF EXISTS "+TABLE_NAME);
 

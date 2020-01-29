@@ -1,4 +1,4 @@
-package example.com.android_note;
+package example.com.android_note.activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -22,6 +22,11 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import example.com.android_note.database.DBConnector;
+import example.com.android_note.adapter.MyListAdapter;
+import example.com.android_note.model.Note;
+import example.com.android_note.R;
+
 /**
  * Class of activity where are shown notes.
  */
@@ -30,47 +35,32 @@ public class ListNotesActivity extends AppCompatActivity
     /**
      * Code of note's adding.
      */
-    public static final int CREATE_ACTIVITY=0;
+    private static final int CREATE_ACTIVITY=0;
 
     /**
      * Object of class DBConnector. Is used for work with database.
      */
-	DBConnector DBConnector;
+	private DBConnector DBConnector;
 
     /**
      * Code of request to read.
      */
-    static final int READ_REQUEST=10;
+    private static final int READ_REQUEST=10;
 
     /**
-     * Object of class myListAdapter. Is used for fill of listNotes.
+     * Object of class MyListAdapter. Is used for fill of listNotes.
      */
-	myListAdapter listAdapter;
-
-    /**
-     * Object of ListView. Holds notes.
-     */
-	ListView listNotes;
-
-    /**
-     * Object of class Bitmap. Is used for work with image.
-     */
-	Bitmap bitmap;
-
-    /**
-     * Object of class Toolbar. Is used for ListNodesActivity.
-     */
-    Toolbar toolbarListNotesActivity;
+	private MyListAdapter listAdapter;
 
     /**
      * Code of note's updating.
      */
-    public static final int UPDATE_ACTIVITY=1;
+    private static final int UPDATE_ACTIVITY=1;
 
     /**
      * Object of class Note. Holds data of every note.
      */
-    Note note;
+    private Note note;
 
     /**
      * Creates Activity.
@@ -88,10 +78,9 @@ public class ListNotesActivity extends AppCompatActivity
 
         int api=Build.VERSION.SDK_INT;
 
-
-        if (api>=23)
+        if(api>=23)
         {
-            if (ContextCompat.checkSelfPermission(this,
+            if(ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
             {
                 init();
@@ -99,35 +88,35 @@ public class ListNotesActivity extends AppCompatActivity
 
             else
             {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(ListNotesActivity.this,
+                if(ActivityCompat.shouldShowRequestPermissionRationale(ListNotesActivity.this,
                         Manifest.permission.READ_EXTERNAL_STORAGE))
                 {
                     ActivityCompat.requestPermissions(ListNotesActivity.this,
-                            new String[]
-                            {
-                                    Manifest.permission.READ_EXTERNAL_STORAGE
-                            },
-                            READ_REQUEST);
+                                                        new String[]
+                                                        {
+                                                                Manifest.permission.READ_EXTERNAL_STORAGE
+                                                        },
+                                                        READ_REQUEST);
                 }
                 else
                 {
                     ActivityCompat.requestPermissions(ListNotesActivity.this,
-                            new String[]
-                            {
-                                    Manifest.permission.READ_EXTERNAL_STORAGE
-                            },
-                            READ_REQUEST);
+                                                        new String[]
+                                                        {
+                                                                Manifest.permission.READ_EXTERNAL_STORAGE
+                                                        },
+                                                        READ_REQUEST);
                 }
             }
 
-            if (ContextCompat.checkSelfPermission(this,
+            if(ContextCompat.checkSelfPermission(this,
                     Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
             {
                 init();
             }
         }
 
-        else if (api<23)
+        else
         {
             init();
         }
@@ -152,13 +141,13 @@ public class ListNotesActivity extends AppCompatActivity
         {
             case READ_REQUEST:
             {
-                if (grantResults.length>0 &&
+                if(grantResults.length>0 &&
                         grantResults[0]==PackageManager.PERMISSION_GRANTED)
                 {
-                    if (ContextCompat.checkSelfPermission(this,
+                    if(ContextCompat.checkSelfPermission(this,
                             Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED)
                     {
-                        Toast.makeText(this,"Permission Granted",Toast.LENGTH_LONG).show();
+                        Toast.makeText(this,"Permission is granted",Toast.LENGTH_LONG).show();
                         init();
                     }
                 }
@@ -167,8 +156,6 @@ public class ListNotesActivity extends AppCompatActivity
                 {
                     Toast.makeText(this,"Permission isn't granted",Toast.LENGTH_LONG).show();
                 }
-
-                return;
             }
         }
     }
@@ -180,12 +167,18 @@ public class ListNotesActivity extends AppCompatActivity
     {
         DBConnector=new DBConnector(this);
 
-        toolbarListNotesActivity=(Toolbar) findViewById(R.id.toolbarListNotesActivity);
+        /*
+          Object of class Toolbar. Is used for ListNodesActivity.
+         */
+        Toolbar toolbarListNotesActivity=findViewById(R.id.toolbarListNotesActivity);
         setSupportActionBar(toolbarListNotesActivity);
 
-        listNotes=(ListView) findViewById(R.id.list);
+        /*
+          Object of ListView. Holds notes.
+         */
+        ListView listNotes=findViewById(R.id.list);
 
-        listAdapter=new myListAdapter(getApplicationContext(), DBConnector.selectAll());
+        listAdapter=new MyListAdapter(this,DBConnector.selectAll());
 
         listNotes.setAdapter(listAdapter);
 
@@ -205,13 +198,13 @@ public class ListNotesActivity extends AppCompatActivity
      *            object of class Intent. Transfers data.
      */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+    protected void onActivityResult(int requestCode,int resultCode,Intent data)
     {
-        if (resultCode==Activity.RESULT_OK)
+        if(resultCode==Activity.RESULT_OK)
         {
-        	note=(Note) data.getExtras().getSerializable("Note");
+        	note=(Note)data.getExtras().getSerializable("Note");
 
-        	if (requestCode==UPDATE_ACTIVITY)
+        	if(requestCode==UPDATE_ACTIVITY)
         		DBConnector.update(note);
 
         	else
@@ -232,48 +225,37 @@ public class ListNotesActivity extends AppCompatActivity
     @Override
 	public boolean onContextItemSelected(MenuItem item) 
     {
-    	AdapterContextMenuInfo info=(AdapterContextMenuInfo) item.getMenuInfo();
+    	AdapterContextMenuInfo info=(AdapterContextMenuInfo)item.getMenuInfo();
 
     	switch(item.getItemId())
     	{
 			case R.id.edit:
-				Intent update=new Intent(getApplicationContext(), EditorActivity.class);
+            {
+                Intent update=new Intent(getApplicationContext(),EditorActivity.class);
 
 				note=DBConnector.select(info.id);
 
-				update.putExtra("Note", note);
+				update.putExtra("Note",note);
 
-				startActivityForResult(update, UPDATE_ACTIVITY);
+				startActivityForResult(update,UPDATE_ACTIVITY);
 
 				updateList();
 
 				return true;
+            }
 
 			case R.id.delete:
-				DBConnector.delete(info.id);
+            {
+                DBConnector.delete(info.id);
 
 				updateList();
 
 				return true;
+            }
 
 			default:
 				return super.onContextItemSelected(item);
     	}
-    }
-
-    /**
-     * This method is used for memory clearing.
-     */
-    @Override
-    public void onPause() 
-    {
-	    super.onPause(); 
-
-	    if (bitmap!=null)
-	    {
-	        bitmap.recycle();
-	        bitmap=null;
-	    }
     }
 
     /**
@@ -295,7 +277,7 @@ public class ListNotesActivity extends AppCompatActivity
     	super.onCreateContextMenu(menu,v,menuInfo);
 
     	MenuInflater inflater=getMenuInflater();
-    	inflater.inflate(R.menu.context_menu, menu);
+    	inflater.inflate(R.menu.context_menu,menu);
     }
 
     /**
@@ -329,26 +311,31 @@ public class ListNotesActivity extends AppCompatActivity
         switch (item.getItemId()) 
         {
 	        case R.id.add:
-	        	Intent add=new Intent(getApplicationContext(),EditorActivity.class);
+	        {
+                Intent add = new Intent(getApplicationContext(), EditorActivity.class);
 
-	        	startActivityForResult(add,CREATE_ACTIVITY);
+                startActivityForResult(add, CREATE_ACTIVITY);
 
-	        	updateList();
-
-	            return true;
-
-            case R.id.deleteAll:
-            	DBConnector.deleteAll();
-
-            	updateList();
+                updateList();
 
                 return true;
+            }
+
+            case R.id.deleteAll:
+            {
+                DBConnector.deleteAll();
+
+                updateList();
+
+                return true;
+            }
 
             case R.id.exit:
+            {
                 finish();
 
                 return true;
-
+            }
 
             default:
                 return super.onOptionsItemSelected(item);

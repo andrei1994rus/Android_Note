@@ -1,4 +1,4 @@
-package example.com.android_note;
+package example.com.android_note.model;
 
 import java.io.Serializable;
 
